@@ -6,31 +6,19 @@ import { TransformControls } from 'three/examples/jsm/controls/TransformControls
 import Stats from 'three/examples/jsm/libs/stats.module'
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import GridMaker from '../components/GridMaker'
-import { GUI } from 'dat.gui'
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass'
-import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader'
-import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass'
 
-var obj3d = new THREE.Object3D(),
-    Group = new THREE.Group(),
-    LoadButton = undefined,
-    selectedObjects = [],
+var LoadButton = undefined,
     obj_index = 0,
     STL_Object = [undefined, undefined, undefined, undefined],
-    Controls = [{ Drag: undefined, Rotate: undefined, Scale: undefined},
-                { Drag: undefined, Rotate: undefined, Scale: undefined},
-                { Drag: undefined, Rotate: undefined, Scale: undefined},
-                { Drag: undefined, Rotate: undefined, Scale: undefined}],
+    Controls = [{ Orbit: undefined, Drag: undefined, Rotate: undefined, Scale: undefined},
+                { Orbit: undefined, Drag: undefined, Rotate: undefined, Scale: undefined},
+                { Orbit: undefined, Drag: undefined, Rotate: undefined, Scale: undefined},
+                { Orbit: undefined, Drag: undefined, Rotate: undefined, Scale: undefined}],
     Scene = undefined,
     Camera = undefined,
     Renderer = undefined,
     Raycaster = undefined,
     Light = undefined,
-    outlinePass = undefined,
-    Composer = undefined,
-    effectFXAA = undefined,
     mouse = undefined,
     isStart= false,
     boundings = [undefined, undefined, undefined, undefined],
@@ -40,7 +28,7 @@ var obj3d = new THREE.Object3D(),
     rotation_event = [undefined, undefined, undefined, undefined],
     scale_event = [undefined, undefined, undefined, undefined],
     activeIndex = -1
-const CanvasContainer = ({props, gridPlane, outline, activeControl, materialControl, positionControl, rotationControl, scaleControl, allControl}) => {
+const CanvasContainer = ({props, gridPlane, activeControl, materialControl, positionControl, rotationControl, scaleControl, allControl}) => {
   const mountRef = useRef(null);
   
   function loadObject(e) {
@@ -66,7 +54,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
           else if(obj_index===4) mesh.position.set(-gridPlane.width/4, gridPlane.height/4, 0)
           STL_Object[obj_index-1] = mesh
           // console.log(obj_index-1)
-          Group.add(STL_Object[obj_index-1])
+          Scene.add(STL_Object[obj_index-1])
           STL_Object[obj_index-1].geometry.computeBoundingBox()
           var helper = new THREE.BoxHelper(STL_Object[obj_index-1], 0x000000)
           helper.geometry.computeBoundingBox()
@@ -84,10 +72,6 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
     else {
       console.log("Only 4 Object Can be Exist")
     }
-  }
-  function addSelectedObject( object ) {
-    selectedObjects = [];
-    selectedObjects.push( object );
   }
   const onClickFace = (event) => {
     event.preventDefault()
@@ -108,9 +92,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
       if(STL_Object[1]) STL_Object[1].material.color.set(0x555555)
       if(STL_Object[2]) STL_Object[2].material.color.set(0x555555)
       if(STL_Object[3]) STL_Object[3].material.color.set(0x555555)
-      let selectedObject = intersects[0][0].object;
-      addSelectedObject( selectedObject );
-      outlinePass.selectedObjects = selectedObjects;
+      
       allControl(STL_Object[0].position.x, STL_Object[0].position.y, STL_Object[0].rotation.x, STL_Object[0].rotation.y, STL_Object[0].rotation.z, STL_Object[0].scale.x, STL_Object[0].scale.y, STL_Object[0].scale.z)
       activeIndex = 0
       Renderer.render(Scene, Camera)
@@ -121,9 +103,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
       if(STL_Object[0]) STL_Object[0].material.color.set(0x555555)
       if(STL_Object[2]) STL_Object[2].material.color.set(0x555555)
       if(STL_Object[3]) STL_Object[3].material.color.set(0x555555)
-      let selectedObject = intersects[1][0].object;
-      addSelectedObject( selectedObject );
-      outlinePass.selectedObjects = selectedObjects;
+
       allControl(STL_Object[1].position.x, STL_Object[1].position.y, STL_Object[1].rotation.x, STL_Object[1].rotation.y, STL_Object[1].rotation.z, STL_Object[1].scale.x, STL_Object[1].scale.y, STL_Object[1].scale.z)
       activeIndex = 1
       Renderer.render(Scene, Camera)
@@ -134,9 +114,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
       if(STL_Object[0]) STL_Object[0].material.color.set(0x555555)
       if(STL_Object[1]) STL_Object[1].material.color.set(0x555555)
       if(STL_Object[3]) STL_Object[3].material.color.set(0x555555)
-      let selectedObject = intersects[2][0].object;
-      addSelectedObject( selectedObject );
-      outlinePass.selectedObjects = selectedObjects;
+
       allControl(STL_Object[2].position.x, STL_Object[2].position.y, STL_Object[2].rotation.x, STL_Object[2].rotation.y, STL_Object[2].rotation.z, STL_Object[2].scale.x, STL_Object[2].scale.y, STL_Object[2].scale.z)
       activeIndex = 2
       Renderer.render(Scene, Camera)
@@ -147,9 +125,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
       if(STL_Object[0]) STL_Object[0].material.color.set(0x555555)
       if(STL_Object[1]) STL_Object[1].material.color.set(0x555555)
       if(STL_Object[2]) STL_Object[2].material.color.set(0x555555)
-      let selectedObject = intersects[3][0].object;
-      addSelectedObject( selectedObject );
-      outlinePass.selectedObjects = selectedObjects;
+
       allControl(STL_Object[3].position.x, STL_Object[3].position.y, STL_Object[3].rotation.x, STL_Object[3].rotation.y, STL_Object[3].rotation.z, STL_Object[3].scale.x, STL_Object[3].scale.y, STL_Object[3].scale.z)
       activeIndex = 3
       Renderer.render(Scene, Camera)
@@ -159,126 +135,61 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
       if(STL_Object[1]) STL_Object[1].material.color.set(0x555555)
       if(STL_Object[2]) STL_Object[2].material.color.set(0x555555)
       if(STL_Object[3]) STL_Object[3].material.color.set(0x555555)
-      outlinePass.selectedObjects = [];
       activeIndex = -1
     }
     Renderer.render(Scene, Camera)
   }
   useEffect(() => {
-      LoadButton = document.getElementById('loadButton_wrapper')
-      LoadButton.onchange = loadObject
-			Raycaster = new THREE.Raycaster();
-			mouse = new THREE.Vector2();
+    LoadButton = document.getElementById('loadButton_wrapper')
+    LoadButton.onchange = loadObject
+    Scene = new THREE.Scene()
+    Camera = new THREE.PerspectiveCamera( 120, window.innerWidth/window.innerHeight, 0.1, 1000 )
+    Renderer = new THREE.WebGLRenderer()
+    Light = new THREE.DirectionalLight()
+    // console.log(Scene, Camera, Renderer)
+    Renderer.setSize( window.innerWidth, window.innerHeight )
+    Renderer.setClearColor( 0xffffff, 1 )
+    mountRef.current.appendChild( Renderer.domElement )
+    const stats = Stats()
+    mountRef.current.appendChild( stats.dom )
+    Raycaster = new THREE.Raycaster()
+    mouse = new THREE.Vector2()
+    // Initialize Camera Position
+    Camera.position.set(0, -150, 200)
+    console.log(Camera)
+    // Initialize Light Position
+    Light.position.set(10, -10, 10)
+    Scene.add(Light)
+    Controls.Orbit = new OrbitControls(Camera, Renderer.domElement)
+    Controls.Orbit.saveState();
 
-      const width = window.innerWidth;
-      const height = window.innerHeight;
+    // var geometry = new THREE.BoxGeometry( 100, 100, 100 );
+    // var material = new THREE.MeshStandardMaterial( {
+    //     color: 0x00ff00,
+    //     roughness: 0.3,
+    //     matalness: 0.3,
+    //     wireframe: false,
+    //     transparent: true,
+    //     opacity: 1
+    //   } );
+    // STL_Object[0] = new THREE.Mesh( geometry, material );
 
-      Renderer = new THREE.WebGLRenderer();
-      Renderer.shadowMap.enabled = true;
-      Renderer.setSize( window.innerWidth, window.innerHeight )
-      Renderer.setClearColor( 0xffffff, 1 )
-      Renderer.shadowMap.enabled = true
-      mountRef.current.appendChild( Renderer.domElement )
-
-      const stats = Stats()
-      mountRef.current.appendChild( stats.dom )
-      Scene = new THREE.Scene();
-      Camera = new THREE.PerspectiveCamera( 120, width / height, 0.1, 1000 );
-      Camera.position.set(0, -150, 200)
-      // Camera.position.set(0, 0, 8)
-      Controls.Orbit = new OrbitControls(Camera, Renderer.domElement)
-      Controls.Orbit.saveState();
-
-      Scene.add( new THREE.AmbientLight( 0xaaaaaa, 0.2 ) );
-      // Light Destination
-      Light = new THREE.DirectionalLight( 0xddffdd, 0.6 );
-      Light.position.set( 10, -10, 10 );
-      Light.castShadow = true;
-      Light.shadow.mapSize.width = 1024;
-      Light.shadow.mapSize.height = 1024;
-      const d = 10;
-      Light.shadow.camera.left = - d;
-      Light.shadow.camera.right = d;
-      Light.shadow.camera.top = d;
-      Light.shadow.camera.bottom = - d;
-      Light.shadow.camera.far = 1000;
-      Scene.add( Light );
-
-      // model
-      const manager = new THREE.LoadingManager();
-      manager.onProgress = function ( item, loaded, total ) {
-        console.log( item, loaded, total );
-      };
-
-      Scene.add( Group );
-      Group.add( obj3d );
-      
-      // postprocessing
-
-      Composer = new EffectComposer( Renderer );
-
-      const renderPass = new RenderPass( Scene, Camera );
-      Composer.addPass( renderPass );
-
-      outlinePass = new OutlinePass( new THREE.Vector2( window.innerWidth, window.innerHeight ), Scene, Camera );
-      Composer.addPass( outlinePass );
-
-      const textureLoader = new THREE.TextureLoader();
-      textureLoader.load( 'tri_pattern.jpg', function ( texture ) {
-
-        outlinePass.patternTexture = texture;
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-
-      } );
-
-      effectFXAA = new ShaderPass( FXAAShader );
-      effectFXAA.uniforms[ 'resolution' ].value.set( 1 / window.innerWidth, 1 / window.innerHeight );
-      Composer.addPass( effectFXAA );
-
-      window.addEventListener( 'resize', onWindowResize );
-
-      
-      Renderer.domElement.addEventListener( 'pointerdown', onClickFace );
-
-      function onPointerMove( event ) {
-        if ( event.isPrimary === false ) return;
-        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-        checkIntersection();
-      }
-
-      function addSelectedObject( object ) {
-        selectedObjects = [];
-        selectedObjects.push( object );
-      }
-
-      function checkIntersection() {
-        Raycaster.setFromCamera( mouse, Camera );
-        const intersects = Raycaster.intersectObject( Scene, true );
-
-        if ( intersects.length > 0 ) {
-          const selectedObject = intersects[ 0 ].object;
-          addSelectedObject( selectedObject );
-          outlinePass.selectedObjects = selectedObjects;
-        } else {
-          // outlinePass.selectedObjects = [];
-        }
-      }
-			
-
-			function onWindowResize() {
-				const width = window.innerWidth;
-				const height = window.innerHeight;
-				Camera.aspect = width / height;
-				Camera.updateProjectionMatrix();
-				Renderer.setSize( width, height );
-				Composer.setSize( width, height );
-				effectFXAA.uniforms[ 'resolution' ].value.set( 1 / window.innerWidth, 1 / window.innerHeight );
-			}
-
-			function animate() {
-        if(activeIndex!==-1) 
+    // console.log(STL_Object[0].scale)
+    
+    // Scene.add( STL_Object[0] );
+    
+    window.addEventListener('resize', onWindowResize, false)
+    function onWindowResize() {
+      Camera.aspect = window.innerWidth / window.innerHeight
+      Camera.updateProjectionMatrix()
+      Renderer.setSize(window.innerWidth, window.innerHeight)
+      Renderer.render(Scene, Camera)
+    }
+    Renderer.domElement.addEventListener('pointerdown', onClickFace)
+    
+    var animate = function () {
+      // console.log(activeIndex)
+      if(activeIndex!==-1) 
       {
         STL_Object[activeIndex].position.z = 0
         
@@ -295,10 +206,13 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
           STL_Object[activeIndex].position.y = -(gridPlane.height/2)+boundings[activeIndex][3]
         }
       }
-				requestAnimationFrame( animate );
-				Composer.render();
-			}
-      animate()
+      requestAnimationFrame( animate );
+      Renderer.render( Scene, Camera );
+      stats.update()
+    };
+    
+    animate();
+    // return () => mountRef.current.removeChild( Renderer.domElement );
   }, []);
   useEffect(()=>{
     if(activeIndex!==-1)
@@ -696,18 +610,6 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
   useEffect(()=>{
     GridMaker(gridPlane.width, gridPlane.height, 200, 0x000000, 0x999999, Scene)
   }, [gridPlane])
-  useEffect(()=>{
-    if(outlinePass!==undefined){
-      outlinePass.edgeStrength = Number(outline.edgeStrength)
-      outlinePass.edgeGlow = Number(outline.edgeGlow)
-      outlinePass.edgeThickness = Number(outline.edgeThickness)
-      outlinePass.pulsePeriod = Number(outline.pulsePeriod)
-      outlinePass.usePatternTexture = outline.usePatternTexture
-      console.log(outline.visibleEdgeColor, outline.hiddenEdgeColor)
-      outlinePass.visibleEdgeColor.set(outline.visibleEdgeColor)
-      outlinePass.hiddenEdgeColor.set(outline.hiddenEdgeColor)
-    }
-  }, [outline])
   return (
     <div ref={mountRef}>
 
@@ -716,4 +618,4 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
 }
 
 
-export default CanvasContainer;
+export default CanvasContainer222;

@@ -38,7 +38,6 @@ function App() {
     color:0x00ff00,
     wireframe:false,
     opacity: 1,
-    useMat: false,
     x:0,
     y:0,
     usePos:false,
@@ -51,7 +50,15 @@ function App() {
     scale_z:1,
     useSca:false
   })
-  
+  const [outline, setOutline] = useState({
+    edgeStrength: 10,
+    edgeGlow: 0,
+    edgeThickness: 4,
+    pulsePeriod: 0,
+    usePatternTexture: false,
+    visibleEdgeColor: '#fff208',
+    hiddenEdgeColor: '#ff0259'
+  });
   const setGridWidth = useCallback((newValue) => {
     setGridPlane((prev) => ({ ...prev, width: newValue}))
   })
@@ -70,12 +77,6 @@ function App() {
   const setWireFrame = useCallback((newValue) => {
     setObjectProperty((prev) => ({ ...prev, wireframe: newValue }))
   }, [])
-  const setUseMaterial = useCallback((newValue) => {
-    setObjectProperty((prev) =>({ ...prev, useMat: true}))
-  })
-  const toggleSetMaterial = useCallback(() => {
-    setObjectProperty((prev) =>({ ...prev, useMat: false}))
-  })
   const setPositionX = useCallback((newValue) => {
     setObjectProperty((prev) => ({ ...prev, x: newValue }))
   }, [])
@@ -139,12 +140,15 @@ function App() {
     z_scale.setValue(z_sca)
     
   })
-
+  var setup = {
+    grid_width:gridPlane.width,
+    grid_height:gridPlane.height,
+    grid_depth:gridPlane.depth
+  }
   var object = {
     color: objectProperty.color,
     wireframe: objectProperty.wireframe,
     opacity: objectProperty.opacity,
-    useMaterial: objectProperty.useMat,
     position_x: objectProperty.x,
     position_y: objectProperty.y,
     usePositionBox: objectProperty.usePos,
@@ -157,10 +161,14 @@ function App() {
     scale_z: objectProperty.scale_z,
     useScaleBox: objectProperty.useSca
   }
-  var setup = {
-    grid_width:gridPlane.width,
-    grid_height:gridPlane.height,
-    grid_depth:gridPlane.depth
+  var outline_param = {
+    edgeStrength: outline.edgeStrength,
+    edgeGlow: outline.edgeGlow,
+    edgeThickness: outline.edgeThickness,
+    pulsePeriod: outline.pulsePeriod,    
+    usePatternTexture: outline.usePatternTexture,
+    visibleEdgeColor: outline.visibleEdgeColor,
+    hiddenEdgeColor: outline.hiddenEdgeColor 
   }
   useEffect(()=>{
     Control_Gui[0] = new dat.GUI({width:200});
@@ -189,8 +197,30 @@ function App() {
     materialFolder.add(object, "wireframe").onChange(()=>{
       setWireFrame(object.wireframe)
     })
-    materialFolder.add({ add:function(){setUseMaterial(true)}}, 'add')
+    const outlineFolder = Control_Gui[1].addFolder("Outline")
+    outlineFolder.add(outline_param, 'edgeStrength', 0.01, 30).onChange(()=>{
+      setOutline((prev) => ({ ...prev, edgeStrength:outline_param.edgeStrength}))
+    })
+    outlineFolder.add(outline_param, 'edgeGlow', 0.0, 1).onChange(()=>{
+      setOutline((prev)=> ({...prev, edgeGlow:outline_param.edgeGlow}))
+    })
+    outlineFolder.add(outline_param, 'edgeThickness', 1, 4).onChange(()=>{
+      setOutline((prev)=> ({...prev, edgeThickness:outline_param.edgeThickness}))
+    })
+    outlineFolder.add(outline_param, 'pulsePeriod', 0.0, 5).onChange(()=>{
+      setOutline((prev)=> ({...prev, pulsePeriod:outline_param.pulsePeriod}))
+    })
+    outlineFolder.add(outline_param, 'usePatternTexture').onChange(()=>{
+      setOutline((prev)=> ({...prev, usePatternTexture:outline_param.usePatternTexture}))
+    })
+    outlineFolder.addColor(outline_param, 'visibleEdgeColor').onChange(()=>{
+      setOutline((prev)=> ({...prev, visibleEdgeColor:outline_param.visibleEdgeColor}))
+    })
+    outlineFolder.addColor(outline_param, 'hiddenEdgeColor').onChange(()=>{
+      setOutline((prev)=> ({...prev, hiddenEdgeColor:outline_param.hiddenEdgeColor}))
+    })
     materialFolder.open()
+    outlineFolder.open()
 
     Control_Gui[2] = new dat.GUI({width:200});
     Control_Gui[2].domElement.id = 'control-gui'
@@ -254,8 +284,8 @@ function App() {
       <CanvasContainer 
         props={objectProperty}
         gridPlane={gridPlane}
+        outline={outline}
         activeControl={activeGui}
-        materialControl={toggleSetMaterial}
         positionControl={toggleSetPosition} 
         rotationControl={toggleSetRotation}
         scaleControl={toggleSetScale}
