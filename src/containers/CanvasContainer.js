@@ -397,14 +397,15 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
     }
     else if(activeControl===3){
       if(STL_Object[0]) {
-        console.log("enter?")
         Controls[0].Rotate = new TransformControls(Camera, Renderer.domElement)
         Controls[0].Rotate.attach(STL_Object[0])
         Controls[0].Rotate.setSize(0.5)
         Controls[0].Rotate.setSpace('local')
         Controls[0].Rotate.setMode('rotate')
         Controls[0].Rotate.translationSnap = 0.3
-        Controls[0].Rotate.position.set(STL_Object[0].position.x, STL_Object[0].position.y, 0)
+        Controls[0].Rotate.traverse((obj) => {
+          obj.isTransforControls = true
+        })
         
         rotation_event[0] = () => {
           console.log("enter this")
@@ -424,7 +425,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
           }
         }
         Controls[0].Rotate.addEventListener('dragging-changed', rotation_event[0], false)
-        Scene.add(Controls[0].Rotate)
+        Group.add(Controls[0].Rotate)
       }
       if(STL_Object[1]) {
         Controls[1].Rotate = new TransformControls(Camera, Renderer.domElement)
@@ -433,7 +434,9 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
         Controls[1].Rotate.setSpace('local')
         Controls[1].Rotate.setMode('rotate')
         Controls[1].Rotate.translationSnap = 0.3
-        // Controls[1].Rotate.position.set(STL_Object[1].position.x, STL_Object[1].position.y, 0)
+        Controls[1].Rotate.traverse((obj) => {
+          obj.isTransforControls = true
+        })
         rotation_event[1] = () => {
           isStart=!isStart
           if(isStart) {
@@ -451,7 +454,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
           }
         }
         Controls[1].Rotate.addEventListener('dragging-changed', rotation_event[1], false)
-        Scene.add(Controls[1].Rotate)
+        Group.add(Controls[1].Rotate)
       }
       if(STL_Object[2]) {
         Controls[2].Rotate = new TransformControls(Camera, Renderer.domElement)
@@ -460,7 +463,9 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
         Controls[2].Rotate.setSpace('local')
         Controls[2].Rotate.setMode('rotate')
         Controls[2].Rotate.translationSnap = 0.3
-        // Controls[2].Rotate.position.set(STL_Object[2].position.x, STL_Object[2].position.y, 0)
+        Controls[2].Rotate.traverse((obj) => {
+          obj.isTransforControls = true
+        })
         rotation_event[2] = () => {
           isStart=!isStart
           if(isStart) {
@@ -478,7 +483,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
           }
         }
         Controls[2].Rotate.addEventListener('dragging-changed', rotation_event[2], false)
-        Scene.add(Controls[2].Rotate)
+        Group.add(Controls[2].Rotate)
       }
       if(STL_Object[3]) {
         Controls[3].Rotate = new TransformControls(Camera, Renderer.domElement)
@@ -487,7 +492,9 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
         Controls[3].Rotate.setSpace('local')
         Controls[3].Rotate.setMode('rotate')
         Controls[3].Rotate.translationSnap = 0.3
-        // Controls[3].Rotate.position.set(STL_Object[3].position.x, STL_Object[3].position.y, 0)
+        Controls[3].Rotate.traverse((obj) => {
+          obj.isTransforControls = true
+        })
         rotation_event[3] = () => {
           isStart=!isStart
           if(isStart) {
@@ -505,7 +512,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
           }
         }
         Controls[3].Rotate.addEventListener('dragging-changed', rotation_event[3], false)
-        Scene.add(Controls[3].Rotate)
+        Group.add(Controls[3].Rotate)
       }
     }
     else if(activeControl===4){
@@ -516,6 +523,9 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
         Controls[0].Scale.setSpace('local')
         Controls[0].Scale.setMode('scale')
         Controls[0].Scale.translationSnap = 0.3
+        Controls[0].Scale.traverse((obj) => {
+          obj.isTransforControls = true
+        })
         scale_event = () => {
           isStart=!isStart
           if(isStart) {
@@ -534,7 +544,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
           }
         }
         Controls[0].Scale.addEventListener('dragging-changed', scale_event, false)
-        Scene.add(Controls[0].Scale)
+        Group.add(Controls[0].Scale)
       }
       if(STL_Object[1]) {
         Controls[1].Scale = new TransformControls(Camera, Renderer.domElement)
@@ -543,6 +553,9 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
         Controls[1].Scale.setSpace('local')
         Controls[1].Scale.setMode('scale')
         Controls[1].Scale.translationSnap = 0.3
+        Controls[1].Scale.traverse((obj) => {
+          obj.isTransforControls = true
+        })
         scale_event = () => {
           isStart=!isStart
           if(isStart) {
@@ -561,7 +574,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
           }
         }
         Controls[1].Scale.addEventListener('dragging-changed', scale_event, false)
-        Scene.add(Controls[1].Scale)
+        Group.add(Controls[1].Scale)
       }
       if(STL_Object[2]) {
         Controls[2].Scale = new TransformControls(Camera, Renderer.domElement)
@@ -570,6 +583,9 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
         Controls[2].Scale.setSpace('local')
         Controls[2].Scale.setMode('scale')
         Controls[2].Scale.translationSnap = 0.3
+        Controls[2].Scale.traverse((obj) => {
+          obj.isTransforControls = true
+        })
         scale_event = () => {
           isStart=!isStart
           if(isStart) {
@@ -588,7 +604,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
           }
         }
         Controls[2].Scale.addEventListener('dragging-changed', scale_event, false)
-        Scene.add(Controls[2].Scale)
+        Group.add(Controls[2].Scale)
       }
       if(STL_Object[3]) {
         Controls[3].Scale = new TransformControls(Camera, Renderer.domElement)
@@ -597,6 +613,9 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
         Controls[3].Scale.setSpace('local')
         Controls[3].Scale.setMode('scale')
         Controls[3].Scale.translationSnap = 0.3
+        Controls[3].Scale.traverse((obj) => {
+          obj.isTransforControls = true
+        })
         scale_event = () => {
           isStart=!isStart
           if(isStart) {
@@ -615,7 +634,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
           }
         }
         Controls[3].Scale.addEventListener('dragging-changed', scale_event, false)
-        Scene.add(Controls[3].Scale)
+        Group.add(Controls[3].Scale)
       }
     }
     return () => {
@@ -628,13 +647,13 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
       else if(Controls[0].Rotate) {
         Controls[0].Rotate.enabled = false
         Controls[0].Rotate.removeEventListener('dragging-changed', rotation_event[0], false)
-        Scene.remove(Controls[0].Rotate)
+        Group.remove(Controls[0].Rotate)
         Controls[0].Rotate = undefined
       }
       else if(Controls[0].Scale) {
         Controls[0].Scale.enabled = false
         Controls[0].Scale.removeEventListener('dragging-changed', scale_event[0], false)
-        Scene.remove(Controls[0].Scale)
+        Group.remove(Controls[0].Scale)
         Controls[0].Scale = undefined
       }
       if(Controls[1].Drag) {
@@ -646,13 +665,13 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
       else if(Controls[1].Rotate) {
         Controls[1].Rotate.enabled = false
         Controls[1].Rotate.removeEventListener('dragging-changed', rotation_event[1], false)
-        Scene.remove(Controls[1].Rotate)
+        Group.remove(Controls[1].Rotate)
         Controls[1].Rotate = undefined
       }
       else if(Controls[1].Scale) {
         Controls[1].Scale.enabled = false
         Controls[1].Scale.removeEventListener('dragging-changed', scale_event[1], false)
-        Scene.remove(Controls[1].Scale)
+        Group.remove(Controls[1].Scale)
         Controls[1].Scale = undefined
       }
       if(Controls[2].Drag) {
@@ -664,13 +683,13 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
       else if(Controls[2].Rotate) {
         Controls[2].Rotate.enabled = false
         Controls[2].Rotate.removeEventListener('dragging-changed', rotation_event[2], false)
-        Scene.remove(Controls[2].Rotate)
+        Group.remove(Controls[2].Rotate)
         Controls[2].Rotate = undefined
       }
       else if(Controls[2].Scale) {
         Controls[2].Scale.enabled = false
         Controls[2].Scale.removeEventListener('dragging-changed', scale_event[2], false)
-        Scene.remove(Controls[2].Scale)
+        Group.remove(Controls[2].Scale)
         Controls[2].Scale = undefined
       }
       if(Controls[3].Drag) {
@@ -682,13 +701,13 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
       else if(Controls[3].Rotate) {
         Controls[3].Rotate.enabled = false
         Controls[3].Rotate.removeEventListener('dragging-changed', rotation_event[3], false)
-        Scene.remove(Controls[3].Rotate)
+        Group.remove(Controls[3].Rotate)
         Controls[3].Rotate = undefined
       }
       else if(Controls[3].Scale) {
         Controls[3].Scale.enabled = false
         Controls[3].Scale.removeEventListener('dragging-changed', scale_event[3], false)
-        Scene.remove(Controls[3].Scale)
+        Group.remove(Controls[3].Scale)
         Controls[3].Scale = undefined
       }
     }

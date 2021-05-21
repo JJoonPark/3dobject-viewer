@@ -1,7 +1,17 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+/node_modules/*
+!/node_modules/three/
+/node_modules/three/*
+!/node_modules/three/examples
+/node_modules/three/examples/*
+!/node_modules/three/examples/jsm
+/node_modules/three/examples/jsm/*
+!/node_modules/three/examples/jsm/postprocessing
+/node_modules/three/examples/jsm/postprocessing/*
+!/node_modules/three/examples/jsm/postprocessing/OutlinePass.js
+
 /.pnp
 .pnp.js
 /public
