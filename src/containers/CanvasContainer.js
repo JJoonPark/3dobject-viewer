@@ -6,7 +6,6 @@ import { TransformControls } from 'three/examples/jsm/controls/TransformControls
 import Stats from 'three/examples/jsm/libs/stats.module'
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import GridMaker from '../components/GridMaker'
-import { GUI } from 'dat.gui'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass'
@@ -17,8 +16,7 @@ var obj3d = new THREE.Object3D(),
     Group = new THREE.Group(),
     LoadButton = undefined,
     selectedObjects = [],
-    obj_index = 0,
-    STL_Object = [undefined, undefined, undefined, undefined],
+    STL_Object = [],
     Controls = [{ Drag: undefined, Rotate: undefined, Scale: undefined},
                 { Drag: undefined, Rotate: undefined, Scale: undefined},
                 { Drag: undefined, Rotate: undefined, Scale: undefined},
@@ -40,32 +38,40 @@ var obj3d = new THREE.Object3D(),
     rotation_event = [undefined, undefined, undefined, undefined],
     scale_event = [undefined, undefined, undefined, undefined],
     activeIndex = -1
-const CanvasContainer = ({props, gridPlane, outline, activeControl, materialControl, positionControl, rotationControl, scaleControl, allControl}) => {
+const CanvasContainer = ({props, newObj, gridPlane, activeObj, outline, activeControl, positionControl, rotationControl, scaleControl}) => {
   const mountRef = useRef(null);
-  
+
   function loadObject(e) {
     var file = e.target.files[0]
     console.log(file.name)
-    obj_index++
-    if(obj_index<5)
+    if(1)
     {
-      // console.log(obj_index)
       var material = new THREE.MeshStandardMaterial( {
         color: 0x555555,
         wireframe: false,
-        transparent: false,
+        transparent: true,
         opacity: 1
       });
       var loader = new STLLoader();
       loader.load(
         file.name,
         function (geometry) {
-          var mesh = new THREE.Mesh(geometry, material)
-          if(obj_index===2) mesh.position.set(gridPlane.width/4, gridPlane.height/4, 0)
-          else if(obj_index===3) mesh.position.set(-gridPlane.width/4, -gridPlane.height/4, 0)
-          else if(obj_index===4) mesh.position.set(-gridPlane.width/4, gridPlane.height/4, 0)
-          STL_Object[obj_index-1] = mesh
-          // console.log(obj_index-1)
+          STL_Object.push(new THREE.Mesh(geometry, material))
+          var obj_index = STL_Object.length
+          if(obj_index-1!==0) {newObj()}
+          console.log(obj_index)
+          if(obj_index===2) {
+            STL_Object[obj_index-1].position.set(gridPlane.width/4, gridPlane.height/4, 0)
+            positionControl(obj_index, gridPlane.width/4, gridPlane.height/4)
+          }
+          else if(obj_index===3) {
+            STL_Object[obj_index-1].position.set(-gridPlane.width/4, -gridPlane.height/4, 0)
+            positionControl(obj_index, -gridPlane.width/4, -gridPlane.height/4)
+          }
+          else if(obj_index===4) {
+            STL_Object[obj_index-1].position.set(-gridPlane.width/4, gridPlane.height/4, 0)
+            positionControl(obj_index, -gridPlane.width/4, gridPlane.height/4)
+          }
           Group.add(STL_Object[obj_index-1])
           STL_Object[obj_index-1].geometry.computeBoundingBox()
           var helper = new THREE.BoxHelper(STL_Object[obj_index-1], 0x000000)
@@ -77,7 +83,6 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
             Math.abs(helper_values.max.y - STL_Object[obj_index-1].position.y),
             Math.abs(STL_Object[obj_index-1].position.y - helper_values.min.y)
           ]
-          console.log(boundings)
         }
       )
     }
@@ -111,9 +116,9 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
       let selectedObject = intersects[0][0].object;
       addSelectedObject( selectedObject );
       outlinePass.selectedObjects = selectedObjects;
-      allControl(STL_Object[0].position.x, STL_Object[0].position.y, STL_Object[0].rotation.x, STL_Object[0].rotation.y, STL_Object[0].rotation.z, STL_Object[0].scale.x, STL_Object[0].scale.y, STL_Object[0].scale.z)
+      // allControl(STL_Object[0].position.x, STL_Object[0].position.y, STL_Object[0].rotation.x, STL_Object[0].rotation.y, STL_Object[0].rotation.z, STL_Object[0].scale.x, STL_Object[0].scale.y, STL_Object[0].scale.z)
       activeIndex = 0
-      Renderer.render(Scene, Camera)
+      activeObj(0)
     }
     else if(intersects[1].length>0)
     {      
@@ -124,9 +129,8 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
       let selectedObject = intersects[1][0].object;
       addSelectedObject( selectedObject );
       outlinePass.selectedObjects = selectedObjects;
-      allControl(STL_Object[1].position.x, STL_Object[1].position.y, STL_Object[1].rotation.x, STL_Object[1].rotation.y, STL_Object[1].rotation.z, STL_Object[1].scale.x, STL_Object[1].scale.y, STL_Object[1].scale.z)
       activeIndex = 1
-      Renderer.render(Scene, Camera)
+      activeObj(1)
     }
     else if(intersects[2].length>0)
     {
@@ -137,9 +141,8 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
       let selectedObject = intersects[2][0].object;
       addSelectedObject( selectedObject );
       outlinePass.selectedObjects = selectedObjects;
-      allControl(STL_Object[2].position.x, STL_Object[2].position.y, STL_Object[2].rotation.x, STL_Object[2].rotation.y, STL_Object[2].rotation.z, STL_Object[2].scale.x, STL_Object[2].scale.y, STL_Object[2].scale.z)
       activeIndex = 2
-      Renderer.render(Scene, Camera)
+      activeObj(2)
     }
     else if(intersects[3].length>0)
     {
@@ -149,10 +152,9 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
       if(STL_Object[2]) STL_Object[2].material.color.set(0x555555)
       let selectedObject = intersects[3][0].object;
       addSelectedObject( selectedObject );
-      outlinePass.selectedObjects = selectedObjects;
-      allControl(STL_Object[3].position.x, STL_Object[3].position.y, STL_Object[3].rotation.x, STL_Object[3].rotation.y, STL_Object[3].rotation.z, STL_Object[3].scale.x, STL_Object[3].scale.y, STL_Object[3].scale.z)
+      outlinePass.selectedObjects = selectedObjects;      
       activeIndex = 3
-      Renderer.render(Scene, Camera)
+      activeObj(3)
     }
     else{
       if(STL_Object[0]) STL_Object[0].material.color.set(0x555555)
@@ -161,6 +163,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
       if(STL_Object[3]) STL_Object[3].material.color.set(0x555555)
       outlinePass.selectedObjects = [];
       activeIndex = -1
+      activeObj(-1)
     }
     Renderer.render(Scene, Camera)
   }
@@ -301,22 +304,17 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
       animate()
   }, []);
   useEffect(()=>{
-    if(activeIndex!==-1)
-    {
-      if(props.useMat) {
-        STL_Object[activeIndex].material.setValues({color:props.color, opacity:props.opacity, wireframe:props.wireframe})
-        materialControl()
+    if(STL_Object.length>0) {
+      for(let i=0; i<STL_Object.length; i++){
+        if(activeControl===1) STL_Object[i].material.setValues({opacity:props[i].opacity, wireframe:props[i].wireframe})  
+        if(activeControl===2) STL_Object[i].position.set(props[i].x, props[i].y, 0)
+        if(activeControl===3) STL_Object[i].rotation.set(props[i].rotate_x, props[i].rotate_y, props[i].rotate_z)
+        if(activeControl===4) STL_Object[i].scale.set(props[i].scale_x, props[i].scale_y, props[i].scale_z)
       }
-      if(props.usePos) STL_Object[activeIndex].position.set(props.x, props.y, 0)
-      if(props.useRot) STL_Object[activeIndex].rotation.set(props.rotate_x, props.rotate_y, props.rotate_z)
-      if(props.useSca) STL_Object[activeIndex].scale.set(props.scale_x, props.scale_y, props.scale_z)
     }
   }, [props])
 
   useEffect(()=>{
-    
-    console.log(activeControl)
-    console.log(Controls)
     if(activeControl===2){
       if(STL_Object[0])
       {
@@ -327,7 +325,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
         }
         dragend_event[0] = () => {
           console.log('drag end[0]')
-          positionControl(STL_Object[0].position.x, STL_Object[0].position.y)
+          positionControl(1, STL_Object[0].position.x, STL_Object[0].position.y)
           Controls.Orbit.enabled = true
         }
         Controls[0].Drag.addEventListener('dragstart', dragstart_event[0], false)
@@ -345,7 +343,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
         }
         dragend_event[1] = () => {
           console.log('drag end[1]')
-          positionControl(STL_Object[1].position.x, STL_Object[1].position.y)
+          positionControl(2, STL_Object[1].position.x, STL_Object[1].position.y)
           Controls.Orbit.enabled = true
         }
         Controls[1].Drag.addEventListener('dragstart', dragstart_event[1], false)
@@ -362,7 +360,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
         }
         dragend_event[2] = () => {
           console.log('drag end[2]')
-          positionControl(STL_Object[2].position.x, STL_Object[2].position.y)
+          positionControl(3, STL_Object[2].position.x, STL_Object[2].position.y)
           Controls.Orbit.enabled = true
         }
         Controls[2].Drag.addEventListener('dragstart', dragstart_event[2], false)
@@ -379,7 +377,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
         }
         dragend_event[3] = () => {
           console.log('drag end[3]')
-          positionControl(STL_Object[3].position.x, STL_Object[3].position.y)
+          positionControl(4, STL_Object[3].position.x, STL_Object[3].position.y)
           Controls.Orbit.enabled = true
         }
         Controls[3].Drag.addEventListener('dragstart', dragstart_event[3], false)
@@ -387,13 +385,6 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
       
         Scene.add(Controls[3].Drag)
       }
-      // onClickFace = (event) => {
-      //   event.preventDefault()
-      //   console.log("Click")
-      //   // mouseEventHandler(event)
-      // }
-      // Renderer.domElement.addEventListener('pointerdown', onClickFace)
-      console.log(Renderer)
     }
     else if(activeControl===3){
       if(STL_Object[0]) {
@@ -420,7 +411,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
           } else {
             console.log("dragging-end[0]")
             euler[0] = STL_Object[0].rotation
-            rotationControl(STL_Object[0].rotation.x, STL_Object[0].rotation.y, STL_Object[0].rotation.z)
+            rotationControl(1, STL_Object[0].rotation.x, STL_Object[0].rotation.y, STL_Object[0].rotation.z)
             Controls.Orbit.enabled = true
           }
         }
@@ -449,7 +440,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
           } else {
             console.log("dragging-end[1]")
             euler[1] = STL_Object[1].rotation
-            rotationControl(STL_Object[1].rotation.x, STL_Object[1].rotation.y, STL_Object[1].rotation.z)
+            rotationControl(2, STL_Object[1].rotation.x, STL_Object[1].rotation.y, STL_Object[1].rotation.z)
             Controls.Orbit.enabled = true
           }
         }
@@ -478,7 +469,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
           } else {
             console.log("dragging-end[2]")
             euler[2] = STL_Object[2].rotation
-            rotationControl(STL_Object[2].rotation.x, STL_Object[2].rotation.y, STL_Object[2].rotation.z)
+            rotationControl(3, STL_Object[2].rotation.x, STL_Object[2].rotation.y, STL_Object[2].rotation.z)
             Controls.Orbit.enabled = true
           }
         }
@@ -507,7 +498,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
           } else {
             console.log("dragging-end[3]")
             euler[3] = STL_Object[3].rotation
-            rotationControl(STL_Object[3].rotation.x, STL_Object[3].rotation.y, STL_Object[3].rotation.z)
+            rotationControl(4, STL_Object[3].rotation.x, STL_Object[3].rotation.y, STL_Object[3].rotation.z)
             Controls.Orbit.enabled = true
           }
         }
@@ -539,7 +530,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
           else {
             console.log("dragging-end")
             console.log(STL_Object[0].scale.z)
-            scaleControl(STL_Object[0].scale.x, STL_Object[0].scale.y, STL_Object[0].scale.z)
+            scaleControl(1, STL_Object[0].scale.x, STL_Object[0].scale.y, STL_Object[0].scale.z)
             Controls.Orbit.enabled = true
           }
         }
@@ -569,7 +560,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
           else {
             console.log("dragging-end")
             console.log(STL_Object[1].scale.z)
-            scaleControl(STL_Object[1].scale.x, STL_Object[1].scale.y, STL_Object[1].scale.z)
+            scaleControl(2, STL_Object[1].scale.x, STL_Object[1].scale.y, STL_Object[1].scale.z)
             Controls.Orbit.enabled = true
           }
         }
@@ -599,7 +590,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
           else {
             console.log("dragging-end")
             console.log(STL_Object[2].scale.z)
-            scaleControl(STL_Object[2].scale.x, STL_Object[2].scale.y, STL_Object[2].scale.z)
+            scaleControl(3, STL_Object[2].scale.x, STL_Object[2].scale.y, STL_Object[2].scale.z)
             Controls.Orbit.enabled = true
           }
         }
@@ -629,7 +620,7 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
           else {
             console.log("dragging-end")
             console.log(STL_Object[3].scale.z)
-            scaleControl(STL_Object[3].scale.x, STL_Object[3].scale.y, STL_Object[3].scale.z)
+            scaleControl(4, STL_Object[3].scale.x, STL_Object[3].scale.y, STL_Object[3].scale.z)
             Controls.Orbit.enabled = true
           }
         }
@@ -722,7 +713,6 @@ const CanvasContainer = ({props, gridPlane, outline, activeControl, materialCont
       outlinePass.edgeThickness = Number(outline.edgeThickness)
       outlinePass.pulsePeriod = Number(outline.pulsePeriod)
       outlinePass.usePatternTexture = outline.usePatternTexture
-      console.log(outline.visibleEdgeColor, outline.hiddenEdgeColor)
       outlinePass.visibleEdgeColor.set(outline.visibleEdgeColor)
       outlinePass.hiddenEdgeColor.set(outline.hiddenEdgeColor)
     }
