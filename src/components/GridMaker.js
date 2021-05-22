@@ -43,7 +43,7 @@ function canvasInMesh(w, h, textAlign, textBaseline, color, size) {
   context.scale(scale, scale);
   context.fillStyle = color || 0x000000;
   //context.fillStyle = color || fontColor;
-  context.font = `${size}px sans-serif`;
+  context.font = `${size*3/4}px sans-serif`;
   context.textAlign = textAlign;
   context.textBaseline = textBaseline;
   canvasTexture.minFilter = THREE.LinearFilter;
@@ -72,12 +72,12 @@ export default function GridMaker(
   const Plane_Material = new THREE.MeshBasicMaterial({
     color: 0xcccccc,
     transparent: true,
-    opacity: 0.5
+    opacity: 0.3
   });
   const gridPlane = new THREE.Mesh(Plane_Geometry, Plane_Material);
-  const unitMinor = 5;
-  const unitMajor = 25;
-  const fontScale = 1.5;
+  const unitMinor = 25;
+  const unitMajor = 50;
+  const fontScale = 0.5;
 
   let majors = [],
     minors = [],
@@ -121,7 +121,7 @@ export default function GridMaker(
     {x:  width/2, y:  height/2, z: depth},
     {x: -width/2, y:  height/2, z: depth},
   ]
-  view.add(makeLinesFromPoints(points, 0x333333, 0.25))
+  view.add(makeLinesFromPoints(points, 0x000000, 0.25))
   if (xon) {
     let xPadding = labelSize * 4,
       canvas = canvasInMesh(
@@ -142,8 +142,8 @@ export default function GridMaker(
       context.fillText(i.toString(), xo + i + xPadding / 2, 0);
     }
 
-    context.font = labelSize * 1 + "px sans-serif";
-    context.fillText(xlabel, (x + xPadding) / 2, labelSize * 1.5);
+    context.font = labelSize * 0.8 + "px sans-serif";
+    context.fillText(xlabel, (x + xPadding) / 2, labelSize * 1);
     mesh.position.set(0, -h - labelSize * 2, zp);
     view.add(mesh);
   }

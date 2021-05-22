@@ -29,6 +29,9 @@ function App() {
   const toggleSetActiveObj = (index) => {
     setActiveObj(index)
   }
+  const toggleSetInitialGui = () => {
+    setActiveGui(-1)
+  }
   const toggleSetup = (value) => {
     if(value===0){
       Setup_Gui.show()
@@ -112,6 +115,7 @@ function App() {
     )
   }
   const toggleUpdateObjectPos = (id, value_1, value_2) => {
+    console.log(id, value_1, value_2)
     x_position[id-1].setValue(value_1)
     y_position[id-1].setValue(value_2)
   }
@@ -267,7 +271,7 @@ function App() {
   }, [])
   return (
     <>
-      <ControlButtons toggleSetup={toggleSetup} />
+      <ControlButtons props={activeGui} toggleSetup={toggleSetup} />
       <input id="loadButton_wrapper" type="file" accept=".stl"/>
       <input type="button" id="loadButton" value="Load STL"  onClick={()=>{document.getElementById('loadButton_wrapper').click()}}/>
       <CanvasContainer 
@@ -275,6 +279,7 @@ function App() {
         newObj={toggleCreateObjectProps}
         gridPlane={gridPlane}
         activeObj={toggleSetActiveObj}
+        initialGui = {toggleSetInitialGui}
         outline={outline}
         activeControl={activeGui}
         positionControl={toggleUpdateObjectPos}

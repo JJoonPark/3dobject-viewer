@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import Tabs from '@material-ui/core/Tabs';
@@ -61,14 +61,17 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function ControlButtons(props) {
+export default function ControlButtons({props, toggleSetup}) {
   const classes = useStyles();
-  const [value, setValue] = React.useState(-1);
-
+  const [value, setValue] = React.useState(props);
+  
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
+  useEffect(()=> {
+    setValue(props)
+  },[props])
   return (
     <div className={classes.root}>
       <Tabs
@@ -78,11 +81,11 @@ export default function ControlButtons(props) {
         aria-label="Vertical tabs example"
         className={classes.tabs}
       >
-        <Tab className={classes.tab} label="Setup" onClick={()=>props.toggleSetup(0)} {...a11yProps(0)} />
-        <Tab className={classes.tab} label="Render" onClick={()=>props.toggleSetup(1)} {...a11yProps(1)} />
-        <Tab className={classes.tab} label="Position" onClick={()=>props.toggleSetup(2)} {...a11yProps(2)} />
-        <Tab className={classes.tab} label="Rotation" onClick={()=>props.toggleSetup(3)} {...a11yProps(3)} />
-        <Tab className={classes.tab} label="Scale" onClick={()=>props.toggleSetup(4)} {...a11yProps(4)} />
+        <Tab className={classes.tab} label="Setup" onClick={()=>toggleSetup(0)} {...a11yProps(0)} />
+        <Tab className={classes.tab} label="Render" onClick={()=>toggleSetup(1)} {...a11yProps(1)} />
+        <Tab className={classes.tab} label="Position" onClick={()=>toggleSetup(2)} {...a11yProps(2)} />
+        <Tab className={classes.tab} label="Rotation" onClick={()=>toggleSetup(3)} {...a11yProps(3)} />
+        <Tab className={classes.tab} label="Scale" onClick={()=>toggleSetup(4)} {...a11yProps(4)} />
       </Tabs>
       {/* <TabPanel value={value} index={0}>
         Item One
