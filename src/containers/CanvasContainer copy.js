@@ -85,13 +85,13 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
           Controls.push({Drag:undefined, Rotate:undefined, Scale:undefined})
           // Make Drag Control
           Controls[obj_index-1].Drag = new DragControls([STL_Object[obj_index-1]], Camera, Renderer.domElement)
-          dragstart_event.push(() => {
-            console.log(`drag start[${obj_index-1}]`)
+          dragstart_event.push((index) => {
+            console.log(`drag start[${index}]`)
             Orbit.enabled = false
           })
-          dragend_event.push(() => {
-            console.log(`drag end[${obj_index-1}]`)
-            positionControl(obj_index, STL_Object[obj_index-1].position.x, STL_Object[obj_index-1].position.y)
+          dragend_event.push((index) => {
+            console.log(`drag end[${index}]`)
+            positionControl(index+1, STL_Object[index].position.x, STL_Object[index].position.y)
             Orbit.enabled = true
           })
           Controls[obj_index-1].Drag.enabled = false
@@ -106,17 +106,17 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
           Controls[obj_index-1].Rotate.traverse((obj) => {
             obj.isTransforControls = true
           })
-          rotation_event.push(() => {
+          rotation_event.push((index) => {
             // console.log(index)
             isStart=!isStart
             if(isStart) {
-              console.log(`dragging-start[${obj_index-1}]`)
+              console.log(`dragging-start[${index}]`)
               Orbit.enabled = false
             } else {
-              console.log(`dragging-end[${obj_index-1}]`)
-              console.log(obj_index-1)
-              euler.push(STL_Object[obj_index-1].rotation)
-              rotationControl(obj_index, STL_Object[obj_index-1].rotation.x, STL_Object[obj_index-1].rotation.y, STL_Object[obj_index-1].rotation.z)
+              console.log(`dragging-end[${index}]`)
+              console.log(index)
+              euler.push(STL_Object[index].rotation)
+              rotationControl(index+1, STL_Object[index].rotation.x, STL_Object[index].rotation.y, STL_Object[index].rotation.z)
               Orbit.enabled = true
             }
           })
@@ -124,7 +124,7 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
           
           // Make Scale Control
           Controls[obj_index-1].Scale = new TransformControls(Camera, Renderer.domElement)
-          // Controls[obj_index-1].Scale.attach(STL_Object[obj_index-1])
+          Controls[obj_index-1].Scale.attach(STL_Object[obj_index-1])
           Controls[obj_index-1].Scale.setSize(0.5)
           Controls[obj_index-1].Scale.setSpace('local')
           Controls[obj_index-1].Scale.setMode('scale')
@@ -132,15 +132,15 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
           Controls[obj_index-1].Scale.traverse((obj) => {
             obj.isTransforControls = true
           })
-          scale_event.push(() => {
+          scale_event.push((index) => {
             isStart=!isStart
             if(isStart) {
-              console.log(`dragging-start[${obj_index-1}]`)
+              console.log(`dragging-start[${index}]`)
               Orbit.enabled = false
             }
             else {
-              console.log(`dragging-end[${obj_index-1}]`)
-              scaleControl(obj_index, STL_Object[obj_index-1].scale.x, STL_Object[obj_index-1].scale.y, STL_Object[obj_index-1].scale.z)
+              console.log(`dragging-end[${index}]`)
+              scaleControl(index+1, STL_Object[index].scale.x, STL_Object[index].scale.y, STL_Object[index].scale.z)
               Orbit.enabled = true
             }
           })
@@ -168,8 +168,7 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
     var targetIntersect = []
     var existTarget = false
     for( let i=0; i<STL_Object.length; i++) {
-      if(STL_Object[i]!==undefined) targetIntersect.push(Raycaster.intersectObject(STL_Object[i], false))
-      else targetIntersect.push({length:0})
+      targetIntersect.push(Raycaster.intersectObject(STL_Object[i], false))
       if(targetIntersect[i].length>0) {
         STL_Object[i].material.color.set(0x00ff00)
         let selectedObject = targetIntersect[i][0].object
@@ -180,7 +179,7 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
         existTarget = true
       }
       else {
-        if(STL_Object[i]) STL_Object[i].material.color.set(0x555555)
+        STL_Object[i].material.color.set(0x555555)
       }
     }
 
@@ -206,8 +205,7 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
     var targetIntersect = []
     var existTarget = false
     for( let i=0; i<STL_Object.length; i++) {
-      if(STL_Object[i]!==undefined) targetIntersect.push(Raycaster.intersectObject(STL_Object[i], false))
-      else targetIntersect.push({length:0})
+      targetIntersect.push(Raycaster.intersectObject(STL_Object[i], false))
       if(targetIntersect[i].length>0) {
         selectedObjIndex = i
         existTarget = true
@@ -234,7 +232,7 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
     toggleMenu("off")
   }
   const onDuplicate = () => {
-    // initialGui()
+    initialGui()
     
     var material = new THREE.MeshStandardMaterial( {
       color: 0x555555,
@@ -323,50 +321,32 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
       }
     })
     Controls[obj_index-1].Scale.enabled = false
-
-    if(activeControl===2){
-      Controls[obj_index-1].Drag.addEventListener('dragstart', dragstart_event[obj_index-1], false)
-      Controls[obj_index-1].Drag.addEventListener('dragend', dragend_event[obj_index-1], false)
-      Controls[obj_index-1].Drag.enabled = true
-    }
-    else if(activeControl===3){
-      Controls[obj_index-1].Rotate.attach(STL_Object[obj_index-1])
-      Controls[obj_index-1].Rotate.addEventListener('dragging-changed', rotation_event[obj_index-1], false)
-      Group.add(Controls[obj_index-1].Rotate)
-      Controls[obj_index-1].Rotate.enabled = true
-    }
-    else if(activeControl===4){
-      Controls[obj_index-1].Scale.attach(STL_Object[obj_index-1])
-      Controls[obj_index-1].Scale.addEventListener('dragging-changed', scale_event[obj_index-1], false)
-      Group.add(Controls[obj_index-1].Scale)
-      Controls[obj_index-1].Scale.enabled = true
-    }
     toggleMenu("off")
   }
   const onDelete = () => {
     Group.remove(STL_Object[selectedObjIndex])
-    STL_Object[selectedObjIndex] = undefined
+    STL_Object.splice(selectedObjIndex, 1)
       
-    dragstart_event[selectedObjIndex] = undefined
-    dragend_event[selectedObjIndex] = undefined
+    dragstart_event.splice(selectedObjIndex,1)
+    dragend_event.splice(selectedObjIndex,1)
     Controls[selectedObjIndex].Drag.enabled = false
-    Controls[selectedObjIndex].Drag.removeEventListener('dragstart', dragstart_event[selectedObjIndex], false)
-    Controls[selectedObjIndex].Drag.removeEventListener('dragend', dragend_event[selectedObjIndex], false)
+    Controls[selectedObjIndex].Drag.removeEventListener('dragstart', dragstart_event[selectedObjIndex](selectedObjIndex), false)
+    Controls[selectedObjIndex].Drag.removeEventListener('dragend', dragend_event[selectedObjIndex](selectedObjIndex), false)
     Controls[selectedObjIndex].Drag = undefined
     
     Controls[selectedObjIndex].Rotate.enabled = false
-    Controls[selectedObjIndex].Rotate.removeEventListener('dragging-changed', rotation_event[selectedObjIndex], false)
-    rotation_event[selectedObjIndex] = undefined
+    Controls[selectedObjIndex].Rotate.removeEventListener('dragging-changed', rotation_event[selectedObjIndex](selectedObjIndex), false)
+    rotation_event.splice(selectedObjIndex,1)
     Group.remove(Controls[selectedObjIndex].Rotate)
     Controls[selectedObjIndex].Rotate = undefined
 
     Controls[selectedObjIndex].Scale.enabled = false
-    Controls[selectedObjIndex].Scale.removeEventListener('dragging-changed', scale_event[selectedObjIndex], false)
-    scale_event[selectedObjIndex] = undefined
+    Controls[selectedObjIndex].Scale.removeEventListener('dragging-changed', scale_event[selectedObjIndex](selectedObjIndex), false)
+    scale_event.splice(selectedObjIndex,1)
     Group.remove(Controls[selectedObjIndex].Scale)
     Controls[selectedObjIndex].Scale = undefined
     
-    Controls[selectedObjIndex]= undefined
+    Controls.splice(selectedObjIndex,1)
     console.log(STL_Object.length)
     console.log(STL_Object)
     toggleMenu("off")
@@ -464,7 +444,7 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
 			}
 
 			function animate() {
-        if(activeIndex!==-1 && STL_Object[activeIndex]!==undefined) 
+        if(activeIndex!==-1) 
       {
         STL_Object[activeIndex].position.z = 0
         
@@ -491,66 +471,61 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
   useEffect(()=>{
     if(STL_Object.length>0) {
       for(let i=0; i<STL_Object.length; i++){
-        if(STL_Object[i])
-        {
-          if(activeControl===1) STL_Object[i].material.setValues({opacity:props[i].opacity, wireframe:props[i].wireframe})  
-          if(activeControl===2) STL_Object[i].position.set(props[i].x, props[i].y, 0)
-          if(activeControl===3) STL_Object[i].rotation.set(props[i].rotate_x, props[i].rotate_y, props[i].rotate_z)
-          if(activeControl===4) STL_Object[i].scale.set(props[i].scale_x, props[i].scale_y, props[i].scale_z)
-        }
+        if(activeControl===1) STL_Object[i].material.setValues({opacity:props[i].opacity, wireframe:props[i].wireframe})  
+        if(activeControl===2) STL_Object[i].position.set(props[i].x, props[i].y, 0)
+        if(activeControl===3) STL_Object[i].rotation.set(props[i].rotate_x, props[i].rotate_y, props[i].rotate_z)
+        if(activeControl===4) STL_Object[i].scale.set(props[i].scale_x, props[i].scale_y, props[i].scale_z)
       }
     }
   }, [props])
 
   useEffect(()=>{
     if(activeControl===2){
+      console.log(Controls)
       for(let i=0; i<STL_Object.length; i++)
       {
-        if(Controls[i]){
-          Controls[i].Drag.addEventListener('dragstart', dragstart_event[i], false)
-          Controls[i].Drag.addEventListener('dragend', dragend_event[i], false)
-          Controls[i].Drag.enabled = true
-        }
+        Controls[i].Drag.addEventListener('dragstart', dragstart_event[i](i), false)
+        Controls[i].Drag.addEventListener('dragend', dragend_event[i](i), false)
+        Controls[i].Drag.enabled = true
       }
     }
     else if(activeControl===3){
+      console.log(Group)
       for( let i=0; i<STL_Object.length; i++){
-        if(Controls[i]){
-          Controls[i].Rotate.attach(STL_Object[i])
-          Controls[i].Rotate.addEventListener('dragging-changed', rotation_event[i], false)
-          Group.add(Controls[i].Rotate)
-          Controls[i].Rotate.enabled = true
-        }
+        console.log(STL_Object[i])
+        console.log(Controls[i].Rotate)
+        console.log(rotation_event[i])
+        Controls[i].Rotate.attach(STL_Object[i])
+        Controls[i].Rotate.addEventListener('dragging-changed', rotation_event[i](i), false)
+        Group.add(Controls[i].Rotate)
+        Controls[i].Rotate.enabled = true
       }
     }
     else if(activeControl===4){
       for( let i=0; i<STL_Object.length; i++)
       {
-        if(Controls[i]){
-          Controls[i].Scale.attach(STL_Object[i])
-          Controls[i].Scale.addEventListener('dragging-changed', scale_event[i], false)
-          Group.add(Controls[i].Scale)
-          Controls[i].Scale.enabled = true
-        }
+        Controls[i].Scale.addEventListener('dragging-changed', scale_event[i](i), false)
+        Group.add(Controls[i].Scale)
+        Controls[i].Scale.enabled = true
       }
     }
     return () => {
       for( let i=0; i<STL_Object.length; i++) 
       {
         console.log(i)
-        if(activeControl===2 && Controls[i]) {
-          Controls[i].Drag.removeEventListener('dragstart', dragstart_event[i], false)
-          Controls[i].Drag.removeEventListener('dragend', dragend_event[i], false)
+        if(activeControl===2 && Controls[i].Drag) {
+          Controls[i].Drag.removeEventListener('dragstart', dragstart_event[i](i), false)
+          Controls[i].Drag.removeEventListener('dragend', dragend_event[i](i), false)
           Controls[i].Drag.enabled = false
         }
-        else if(activeControl===3 && Controls[i]) {
+        else if(activeControl===3 && Controls[i].Rotate) {
           Controls[i].Rotate.enabled = false
-          Controls[i].Rotate.removeEventListener('dragging-changed', rotation_event[i], false)
+          Controls[i].Rotate.removeEventListener('dragging-changed', rotation_event[i](i), false)
           Group.remove(Controls[i].Rotate)
         }
-        else if(activeControl===4 && Controls[i]) {
+        else if(activeControl===4 && Controls[i].Scale) {
           Controls[i].Scale.enabled = false
-          Controls[i].Scale.removeEventListener('dragging-changed', scale_event[i], false)
+          Controls[i].Scale.removeEventListener('dragging-changed', scale_event[i](i), false)
           Group.remove(Controls[i].Scale)
         }
       }
