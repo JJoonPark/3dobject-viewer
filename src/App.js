@@ -130,12 +130,12 @@ function App() {
     z_scale[id-1].setValue(value_3)
   }
   const [outline, setOutline] = useState({
-    edgeStrength: 10,
+    edgeStrength: 8,
     edgeGlow: 0,
-    edgeThickness: 4,
+    edgeThickness: 1.5,
     pulsePeriod: 0,
     usePatternTexture: false,
-    visibleEdgeColor: '#fff208',
+    visibleEdgeColor: '#1c298e',
     hiddenEdgeColor: '#ff0259'
   });
   const setGridWidth = useCallback((newValue) => {

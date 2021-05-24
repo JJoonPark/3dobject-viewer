@@ -42,7 +42,7 @@ function a11yProps(index) {
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
-    backgroundColor: 'rgb(30,30,30)',
+    backgroundColor: 'rgb(0,0,0)',
     color:'white',
     display: 'flex',
     position: "absolute",

@@ -47,8 +47,8 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
     if(file)
     {
       initialGui()
-      var material = new THREE.MeshStandardMaterial( {
-        color: 0x555555,
+      var material = new THREE.MeshPhongMaterial( {
+        color: 0xffffff,
         wireframe: false,
         transparent: true,
         opacity: 1
@@ -171,7 +171,7 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
       if(STL_Object[i]!==undefined) targetIntersect.push(Raycaster.intersectObject(STL_Object[i], false))
       else targetIntersect.push({length:0})
       if(targetIntersect[i].length>0) {
-        STL_Object[i].material.color.set(0x00ff00)
+        STL_Object[i].material.color.set(0xffffff)
         let selectedObject = targetIntersect[i][0].object
         addSelectedObject( selectedObject )
         outlinePass.selectedObjects = selectedObjects
@@ -180,7 +180,7 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
         existTarget = true
       }
       else {
-        if(STL_Object[i]) STL_Object[i].material.color.set(0x555555)
+        if(STL_Object[i]) STL_Object[i].material.color.set(0xffffff)
       }
     }
 
@@ -234,10 +234,9 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
     toggleMenu("off")
   }
   const onDuplicate = () => {
-    // initialGui()
-    
+    initialGui()
     var material = new THREE.MeshStandardMaterial( {
-      color: 0x555555,
+      color: 0xffffff,
       wireframe: false,
       transparent: true,
       opacity: 1
@@ -323,24 +322,6 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
       }
     })
     Controls[obj_index-1].Scale.enabled = false
-
-    if(activeControl===2){
-      Controls[obj_index-1].Drag.addEventListener('dragstart', dragstart_event[obj_index-1], false)
-      Controls[obj_index-1].Drag.addEventListener('dragend', dragend_event[obj_index-1], false)
-      Controls[obj_index-1].Drag.enabled = true
-    }
-    else if(activeControl===3){
-      Controls[obj_index-1].Rotate.attach(STL_Object[obj_index-1])
-      Controls[obj_index-1].Rotate.addEventListener('dragging-changed', rotation_event[obj_index-1], false)
-      Group.add(Controls[obj_index-1].Rotate)
-      Controls[obj_index-1].Rotate.enabled = true
-    }
-    else if(activeControl===4){
-      Controls[obj_index-1].Scale.attach(STL_Object[obj_index-1])
-      Controls[obj_index-1].Scale.addEventListener('dragging-changed', scale_event[obj_index-1], false)
-      Group.add(Controls[obj_index-1].Scale)
-      Controls[obj_index-1].Scale.enabled = true
-    }
     toggleMenu("off")
   }
   const onDelete = () => {
@@ -384,32 +365,32 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
       Renderer = new THREE.WebGLRenderer();
       Renderer.shadowMap.enabled = true;
       Renderer.setSize( window.innerWidth, window.innerHeight )
-      Renderer.setClearColor( 0xaaaaaa, 1 )
+      Renderer.setClearColor( 0x222222, 1 )
       Renderer.shadowMap.enabled = true
       mountRef.current.appendChild( Renderer.domElement )
 
       const stats = Stats()
       mountRef.current.appendChild( stats.dom )
       Scene = new THREE.Scene();
-      Camera = new THREE.PerspectiveCamera( 120, width / height, 0.1, 1000 );
-      Camera.position.set(0, -150, 200)
+      Camera = new THREE.PerspectiveCamera( 40, width / height, 0.1, 10000 );
+      Camera.position.set(0, -750, 600)
       // Camera.position.set(0, 0, 8)
       Orbit = new OrbitControls(Camera, Renderer.domElement)
       Orbit.saveState();
 
-      Scene.add( new THREE.AmbientLight( 0xaaaaaa, 0.2 ) );
+      Scene.add( new THREE.AmbientLight( 0xaaaaaa, 0.5 ) );
       // Light Destination
       Light = new THREE.DirectionalLight( 0xddffdd, 0.6 );
-      Light.position.set( 10, -10, 10 );
+      Light.position.set( 1000, -1000, 1000 );
       Light.castShadow = true;
-      Light.shadow.mapSize.width = 1024;
-      Light.shadow.mapSize.height = 1024;
-      const d = 10;
+      Light.shadow.mapSize.width = 8192;
+      Light.shadow.mapSize.height = 8192;
+      const d = 200;
       Light.shadow.camera.left = - d;
       Light.shadow.camera.right = d;
       Light.shadow.camera.top = d;
       Light.shadow.camera.bottom = - d;
-      Light.shadow.camera.far = 1000;
+      Light.shadow.camera.far = 500;
       Scene.add( Light );
 
       // model
@@ -557,7 +538,7 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
     }
   }, [activeControl])
   useEffect(()=>{
-    GridMaker(gridPlane.width, gridPlane.height, 200, 0x000000, 0x000000, Scene)
+    GridMaker(gridPlane.width, gridPlane.height, 500, 0x000000, 0x000000, Scene)
   }, [gridPlane])
   useEffect(()=>{
     if(outlinePass!==undefined){

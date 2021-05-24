@@ -120,8 +120,17 @@ export default function GridMaker(
     {x:  width/2, y: -height/2, z: depth},
     {x:  width/2, y:  height/2, z: depth},
     {x: -width/2, y:  height/2, z: depth},
+    {x: width/2, y: height/2, z:0},
+    {x: -width/2, y: height/2, z:0},
+    {x: width/2, y: height/2, z:0},
+    {x: width/2, y: -height/2, z:0},
+    {x: width/2, y: -height/2, z:0},
+    {x: -width/2, y: -height/2, z:0},
+    {x: -width/2, y: height/2, z:0},
+    {x: -width/2, y: -height/2, z:0},
   ]
-  view.add(makeLinesFromPoints(points, 0x000000, 0.25))
+  view.add(makeLinesFromPoints(points, 0x08fff2, 1))
+  
   if (xon) {
     let xPadding = labelSize * 4,
       canvas = canvasInMesh(
@@ -145,7 +154,7 @@ export default function GridMaker(
     context.font = labelSize * 0.8 + "px sans-serif";
     context.fillText(xlabel, (x + xPadding) / 2, labelSize * 1);
     mesh.position.set(0, -h - labelSize * 2, zp);
-    view.add(mesh);
+    //view.add(mesh);
   }
 
   if (yon) {
@@ -175,7 +184,7 @@ export default function GridMaker(
     context.font = labelSize * 1 + "px sans-serif";
     context.fillText(ylabel, labelSize * 1.25, (y + yPadding) / 2);
     mesh.position.set(-w - labelSize * 2 - 5, 0, zp);
-    view.add(mesh);
+    //view.add(mesh);
   }
 
   for (let x = 0; x > x1; x -= unitMinor) {
@@ -204,9 +213,9 @@ export default function GridMaker(
     arr.push({ x: ow, y: y - yo, z: zp });
   }
   
-  view.add(makeLinesFromPoints(majors, colorMajor || 0x666666, 1));
-  view.add(makeLinesFromPoints(minors, colorMinor || 0xcccccc, 1));
-  view.add(gridPlane);
+  view.add(makeLinesFromPoints(majors, colorMajor || 0x08fff2, 0.5));
+  view.add(makeLinesFromPoints(minors, colorMinor || 0x08fff2, 0.5));
+  // view.add(gridPlane);
 
   scene.remove(old_view);
   old_view = view;
