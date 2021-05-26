@@ -138,15 +138,15 @@ function App() {
     visibleEdgeColor: '#1c298e',
     hiddenEdgeColor: '#ff0259'
   });
-  const setGridWidth = useCallback((newValue) => {
+  const setGridWidth = (newValue) => {
     setGridPlane((prev) => ({ ...prev, width: newValue}))
-  })
-  const setGridHeight = useCallback((newValue) => {
+  }
+  const setGridHeight = (newValue) => {
     setGridPlane((prev) => ({ ...prev, height: newValue}))
-  })
-  const setGridDepth = useCallback((newValue) => {
+  }
+  const setGridDepth = (newValue) => {
     setGridPlane((prev) => ({...prev, depth: newValue}))
-  })
+  }
   
   var setup = {
     grid_width:gridPlane.width,
@@ -269,11 +269,37 @@ function App() {
     createObjectGui(0)
    
   }, [])
+  const [objectLists, setObjectLists] = useState([])
+  const toggleObjectActiveIndex = (value) => {
+    setObjectActiveIndex(value)
+  }
+  const nextObjectListId = useRef(1)
+  const createObjectList = (name) => {
+    var objectList = {
+      id: nextObjectListId.current,
+      name: name
+    }
+    
+    setObjectLists((prev) => [...prev, objectList])
+    nextObjectListId.current += 1
+  }
+  const toggleCreateObjectList = (name) => {
+    createObjectList(name)
+  }
   return (
     <>
       <ControlButtons props={activeGui} toggleSetup={toggleSetup} />
       <input id="loadButton_wrapper" type="file" accept=".stl"/>
       <input type="button" id="loadButton" value="Load STL"  onClick={()=>{document.getElementById('loadButton_wrapper').click()}}/>
+      <button id="view_refresh">Camera Refresh</button>
+      <div id="object_list">
+        <div id="object_list_name">Object List</div>
+        <div id="object_list_area">
+          {objectLists.map(
+            <div className="object_list_item"></div>
+          )}
+        </div>
+      </div>
       <CanvasContainer 
         props={objectProps}
         newObj={toggleCreateObjectProps}

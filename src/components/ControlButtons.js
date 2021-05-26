@@ -47,10 +47,11 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     position: "absolute",
     top: '20%',
+    width: "105px",
     zIndex: 100,
   },
   tabs: {
-    // borderRight: `1px solid ${theme.palette.divider}`,
+    borderRight: `1px solid ${theme.palette.divider}`,
   },
   tab: {
     // width: '50px',

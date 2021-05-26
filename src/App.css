@@ -26,9 +26,37 @@ body,
   color: white;
   font-size: large;
 }
+#view_refresh {
+  height: 35px;
+  width: 150px;
+  position: absolute;
+  top: 5px;
+  left: 182px;
+  background-color: black;
+  color: white;
+  font-size: large;
+}
+#object_list {
+  position: absolute;
+  width: 250px;
+  height: 130px;
+  background-color: black;
+  right: 2%;
+}
+#object_list_name {
+  color:white;
+  padding: 2px;
+  text-align: center;
+}
+#object_list_area {
+  background-color: white;
+  margin-left: 10px;
+  width: 230px;
+  height: 95px;
+}
 #control-gui {
   position: absolute;
-  right: 5%;
+  right: 1%;
   top: 20vh;
   width: 200px;
 }
@@ -73,8 +101,11 @@ body,
   padding: 10px 40px 10px 20px;
   cursor: pointer;
 }
-
 .menu-option:hover {
   background: rgb(255, 230, 4);
 }
-
+.object_list_item {
+  width: 230px;
+  height: 19px;
+  background-color: white;
+}

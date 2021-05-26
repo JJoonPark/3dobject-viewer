@@ -15,6 +15,7 @@ import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass'
 var obj3d = new THREE.Object3D(),
     Group = new THREE.Group(),
     LoadButton = undefined,
+    RefreshButton = undefined,
     selectedObjects = [],
     STL_Object = [],
     Orbit = undefined,
@@ -47,7 +48,7 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
     if(file)
     {
       initialGui()
-      var material = new THREE.MeshPhongMaterial( {
+      var material = new THREE.MeshStandardMaterial( {
         color: 0xffffff,
         wireframe: false,
         transparent: true,
@@ -152,6 +153,11 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
       console.log("Only 4 Object Can be Exist")
     }
   }
+  function refreshCamera () {
+    console.log("?")
+    Camera.position.set(0, -750, 600)
+    Orbit.reset()
+  }
   function addSelectedObject( object ) {
     selectedObjects = [];
     selectedObjects.push( object );
@@ -171,16 +177,12 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
       if(STL_Object[i]!==undefined) targetIntersect.push(Raycaster.intersectObject(STL_Object[i], false))
       else targetIntersect.push({length:0})
       if(targetIntersect[i].length>0) {
-        STL_Object[i].material.color.set(0xffffff)
         let selectedObject = targetIntersect[i][0].object
         addSelectedObject( selectedObject )
         outlinePass.selectedObjects = selectedObjects
         activeIndex = i
         activeObj(i)
         existTarget = true
-      }
-      else {
-        if(STL_Object[i]) STL_Object[i].material.color.set(0xffffff)
       }
     }
 
@@ -355,6 +357,9 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
   useEffect(() => {
       LoadButton = document.getElementById('loadButton_wrapper')
       LoadButton.onchange = loadObject
+      RefreshButton = document.getElementById('view_refresh')
+      RefreshButton.onclick = refreshCamera
+      
 			Raycaster = new THREE.Raycaster();
 			mouse = new THREE.Vector2();
       mouse2 = new THREE.Vector2();
@@ -472,9 +477,11 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
   useEffect(()=>{
     if(STL_Object.length>0) {
       for(let i=0; i<STL_Object.length; i++){
+        console.log(i)
         if(STL_Object[i])
         {
-          if(activeControl===1) STL_Object[i].material.setValues({opacity:props[i].opacity, wireframe:props[i].wireframe})  
+          console.log(props[i].x, props[i].y)
+          if(activeControl===1) STL_Object[i].material.setValues({color:props[i].color ,opacity:props[i].opacity, wireframe:props[i].wireframe})  
           if(activeControl===2) STL_Object[i].position.set(props[i].x, props[i].y, 0)
           if(activeControl===3) STL_Object[i].rotation.set(props[i].rotate_x, props[i].rotate_y, props[i].rotate_z)
           if(activeControl===4) STL_Object[i].scale.set(props[i].scale_x, props[i].scale_y, props[i].scale_z)
@@ -482,6 +489,7 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
       }
     }
   }, [props])
+
 
   useEffect(()=>{
     if(activeControl===2){
@@ -538,7 +546,7 @@ const CanvasContainer = ({props, newObj, gridPlane, activeObj, initialGui, outli
     }
   }, [activeControl])
   useEffect(()=>{
-    GridMaker(gridPlane.width, gridPlane.height, 500, 0x000000, 0x000000, Scene)
+    GridMaker(gridPlane.width, gridPlane.height, gridPlane.depth, 0x000000, 0x000000, Scene)
   }, [gridPlane])
   useEffect(()=>{
     if(outlinePass!==undefined){
