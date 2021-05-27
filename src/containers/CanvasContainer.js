@@ -18,6 +18,7 @@ var obj3d = new THREE.Object3D(),
   RefreshButton = undefined,
   selectedObjects = [],
   STL_Object = [],
+  unhideButton = [],
   ObjName_List = [],
   Orbit = undefined,
   Controls = [],
@@ -45,7 +46,8 @@ const CanvasContainer = ({
   props,
   newObj,
   newObjList,
-  delObjList,
+  changeObjList,
+  objList,
   gridPlane,
   activeObj,
   setActiveObj,
@@ -71,6 +73,7 @@ const CanvasContainer = ({
       var loader = new STLLoader();
       loader.load(file.name, function (geometry) {
         STL_Object.push(new THREE.Mesh(geometry, material));
+        unhideButton.push(undefined);
         var obj_index = STL_Object.length;
         ObjName_List.push(file.name);
         newObjList(file.name);
@@ -216,6 +219,10 @@ const CanvasContainer = ({
     Camera.position.set(0, -750, 600);
     Orbit.reset();
   }
+  function unhideObject(index) {
+    changeObjList("isHide", index, false);
+    Group.add(STL_Object[index - 1]);
+  }
   function addSelectedObject(object) {
     selectedObjects = [];
     selectedObjects.push(object);
@@ -292,7 +299,20 @@ const CanvasContainer = ({
     }
   };
   const onHide = () => {
-    Group.remove(STL_Object[selectedObjIndex]);
+    STL_Object[selectedObjIndex].visible = false;
+
+    unhideButton[selectedObjIndex] = document.getElementById(
+      `unhideButton_${selectedObjIndex + 1}`
+    );
+    unhideButton[selectedObjIndex].style.display = "block";
+    unhideButton[selectedObjIndex].onclick = function () {
+      console.log(selectedObjIndex);
+      changeObjList("isHide", selectedObjIndex + 1, false);
+      STL_Object[selectedObjIndex].visible = true;
+      unhideButton[selectedObjIndex].style.display = "none";
+      unhideButton[selectedObjIndex] = undefined;
+    };
+
     toggleMenu("off");
   };
   const onDuplicate = () => {
@@ -306,6 +326,7 @@ const CanvasContainer = ({
     STL_Object.push(
       new THREE.Mesh(STL_Object[selectedObjIndex].geometry, material)
     );
+    unhideButton.push(undefined);
     ObjName_List.push(ObjName_List[selectedObjIndex] + " copy");
     newObjList(ObjName_List[selectedObjIndex] + " copy");
     var obj_index = STL_Object.length;
@@ -424,7 +445,7 @@ const CanvasContainer = ({
   const onDelete = () => {
     Group.remove(STL_Object[selectedObjIndex]);
     STL_Object[selectedObjIndex] = undefined;
-    delObjList(selectedObjIndex);
+    changeObjList("name", selectedObjIndex, undefined);
     dragstart_event[selectedObjIndex] = undefined;
     dragend_event[selectedObjIndex] = undefined;
     Controls[selectedObjIndex].Drag.enabled = false;
@@ -742,6 +763,7 @@ const CanvasContainer = ({
       outlinePass.selectedObjects = selectedObjects;
     }
   }, [activeObj]);
+
   return (
     <div ref={mountRef} className="test">
       <div className="menu">

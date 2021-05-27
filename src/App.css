@@ -107,5 +107,16 @@ body,
 .object_list_item {
   width: 230px;
   height: 19px;
-  background-color: white;
+  display: flex;
+}
+.object_list_item_unhide {
+  position: absolute;
+  left: 190px;
+  width: 45px;
+  height: 15px;
+  margin-top: 3px;
+  background-color: black;
+  color: white;
+  font-size: 10px;
+  display: none;
 }

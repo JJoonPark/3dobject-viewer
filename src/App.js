@@ -369,11 +369,13 @@ function App() {
     createObjectGui(0);
   }, []);
   const [objectLists, setObjectLists] = useState([]);
-  const nextObjectListId = useRef(0);
+  const nextObjectListId = useRef(1);
   const createObjectList = (name) => {
+    console.log("?");
     var objectList = {
       id: nextObjectListId.current,
       name: name,
+      isHide: false,
     };
 
     setObjectLists((prev) => [...prev, objectList]);
@@ -382,10 +384,10 @@ function App() {
   const toggleCreateObjectList = (name) => {
     createObjectList(name);
   };
-  const toggleDeleteObjectList = (id) => {
+  const toggleChangeObjectList = (key, id, value) => {
     setObjectLists((prev) =>
       prev.map((objectList) =>
-        objectList.id === id ? { ...objectList, name: undefined } : objectList
+        objectList.id === id ? { ...objectList, [key]: value } : objectList
       )
     );
   };
@@ -408,13 +410,26 @@ function App() {
           {objectLists.map(
             (info) =>
               info.name && (
-                <ButtonToggle
-                  key={info.id}
-                  active={activeObj === info.id}
-                  onClick={() => setActiveObj(info.id)}
+                <div
+                  key={`objectList_container_${info.id}`}
+                  className="object_list_item"
                 >
-                  {`[${info.id}] ${info.name}`}
-                </ButtonToggle>
+                  <ButtonToggle
+                    key={`objectList_name_${info.id}`}
+                    className="object_list_item_name"
+                    active={activeObj + 1 === info.id}
+                    onClick={() => setActiveObj(info.id - 1)}
+                  >
+                    {`[${info.id}] ${info.name}`}
+                  </ButtonToggle>
+                  <button
+                    key={`unhide_${info.id}`}
+                    id={`unhideButton_${info.id}`}
+                    className="object_list_item_unhide"
+                  >
+                    Unhide
+                  </button>
+                </div>
               )
           )}
         </div>
@@ -423,7 +438,8 @@ function App() {
         props={objectProps}
         newObj={toggleCreateObjectProps}
         newObjList={toggleCreateObjectList}
-        delObjList={toggleDeleteObjectList}
+        changeObjList={toggleChangeObjectList}
+        objList={objectLists}
         gridPlane={gridPlane}
         activeObj={activeObj}
         setActiveObj={toggleSetActiveObj}
