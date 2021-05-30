@@ -47,6 +47,7 @@ var Control_Gui = [],
 function App() {
   const [activeGui, setActiveGui] = useState(-1);
   const [activeObj, setActiveObj] = useState(-1);
+  const [activeSave, setActiveSave] = useState(false);
   const toggleSetActiveObj = (index) => {
     setActiveObj(index);
   };
@@ -391,6 +392,9 @@ function App() {
       )
     );
   };
+  const toggleSaveButton = (value) => {
+    setActiveSave(value);
+  };
   return (
     <>
       <ControlButtons props={activeGui} toggleSetup={toggleSetup} />
@@ -404,6 +408,13 @@ function App() {
         }}
       />
       <button id="view_refresh">Camera Refresh</button>
+      <button id="saveButton">Save STL</button>
+      <div id="savePopup">
+        Save Object
+        <input className="accept_file_name" value="output"></input>
+        <button id="saveFile">Save</button>
+        <button id="exitSave">Cancle</button>
+      </div>
       <div id="object_list">
         <div id="object_list_name">Object List</div>
         <div id="object_list_area">
@@ -444,6 +455,7 @@ function App() {
         activeObj={activeObj}
         setActiveObj={toggleSetActiveObj}
         initialGui={toggleSetInitialGui}
+        saveObj={toggleSaveButton}
         outline={outline}
         activeControl={activeGui}
         positionControl={toggleUpdateObjectPos}
