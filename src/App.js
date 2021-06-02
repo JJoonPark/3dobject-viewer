@@ -372,7 +372,6 @@ function App() {
   const [objectLists, setObjectLists] = useState([]);
   const nextObjectListId = useRef(1);
   const createObjectList = (name) => {
-    console.log("?");
     var objectList = {
       id: nextObjectListId.current,
       name: name,
@@ -411,7 +410,7 @@ function App() {
       <button id="saveButton">Save STL</button>
       <div id="savePopup">
         Save Object
-        <input className="accept_file_name" value="output"></input>
+        <input id="accept_file_name" value="output"></input>
         <button id="saveFile">Save</button>
         <button id="exitSave">Cancle</button>
       </div>

@@ -5,17 +5,27 @@ import { DragControls } from "three/examples/jsm/controls/DragControls";
 import { TransformControls } from "three/examples/jsm/controls/TransformControls";
 import Stats from "three/examples/jsm/libs/stats.module";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
+import { STLExporter } from "three/examples/jsm/exporters/STLExporter";
 import GridMaker from "../components/GridMaker";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass";
 import { FXAAShader } from "three/examples/jsm/shaders/FXAAShader";
 import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass";
+import { saveAs } from "file-saver";
 
 var obj3d = new THREE.Object3D(),
   Group = new THREE.Group(),
   LoadButton = undefined,
   RefreshButton = undefined,
+  SaveButton = undefined,
+  SavePopup = undefined,
+  SaveFile = undefined,
+  exitSaveFile = undefined,
+  exportPopup = { x: undefined, y: undefined },
+  SavePopup2 = undefined,
+  SaveFile2 = undefined,
+  exitSaveFile2 = undefined,
   selectedObjects = [],
   STL_Object = [],
   unhideButton = [],
@@ -40,7 +50,8 @@ var obj3d = new THREE.Object3D(),
   dragend_event = [],
   rotation_event = [],
   scale_event = [],
-  activeIndex = -1;
+  activeIndex = -1,
+  flatDown_Intersect;
 // menu = undefined
 const CanvasContainer = ({
   props,
@@ -52,6 +63,7 @@ const CanvasContainer = ({
   activeObj,
   setActiveObj,
   initialGui,
+  saveObj,
   outline,
   activeControl,
   positionControl,
@@ -219,9 +231,33 @@ const CanvasContainer = ({
     Camera.position.set(0, -750, 600);
     Orbit.reset();
   }
-  function unhideObject(index) {
-    changeObjList("isHide", index, false);
-    Group.add(STL_Object[index - 1]);
+  function showSaveButton() {
+    SavePopup.style.display = "block";
+  }
+  function saveObject() {
+    var exporter = new STLExporter();
+    var str = exporter.parse(Scene);
+    var blob = new Blob([str], { type: "text/plain" });
+    var exportFileName =
+      document.getElementById("accept_file_name").value + ".stl";
+    console.log(exportFileName);
+    saveAs(blob, exportFileName);
+    SavePopup.style.display = "none";
+  }
+  function exitSaveObject() {
+    SavePopup.style.display = "none";
+  }
+  function saveObject2() {
+    var exporter = new STLExporter();
+    var str = exporter.parse(STL_Object[activeIndex]);
+    var blob = new Blob([str], { type: "text/plain" });
+    var exportFileName =
+      document.getElementById("accept_file_name2").value + ".stl";
+    saveAs(blob, exportFileName);
+    SavePopup2.style.display = "none";
+  }
+  function exitSaveObject2() {
+    SavePopup2.style.display = "none";
   }
   function addSelectedObject(object) {
     selectedObjects = [];
@@ -274,9 +310,10 @@ const CanvasContainer = ({
     var targetIntersect = [];
     var existTarget = false;
     for (let i = 0; i < STL_Object.length; i++) {
-      if (STL_Object[i] !== undefined)
+      if (STL_Object[i] !== undefined) {
         targetIntersect.push(Raycaster.intersectObject(STL_Object[i], false));
-      else targetIntersect.push({ length: 0 });
+        flatDown_Intersect = targetIntersect[i][0].face.normal;
+      } else targetIntersect.push({ length: 0 });
       if (targetIntersect[i].length > 0) {
         selectedObjIndex = i;
         existTarget = true;
@@ -286,6 +323,8 @@ const CanvasContainer = ({
           menu.style.top = `${top}px`;
           toggleMenu("show");
         };
+        exportPopup.x = event.clientX;
+        exportPopup.y = event.clientY;
         const origin = {
           left: event.clientX,
           top: event.clientY,
@@ -299,20 +338,8 @@ const CanvasContainer = ({
     }
   };
   const onHide = () => {
-    STL_Object[selectedObjIndex].visible = false;
-
-    unhideButton[selectedObjIndex] = document.getElementById(
-      `unhideButton_${selectedObjIndex + 1}`
-    );
-    unhideButton[selectedObjIndex].style.display = "block";
-    unhideButton[selectedObjIndex].onclick = function () {
-      console.log(selectedObjIndex);
-      changeObjList("isHide", selectedObjIndex + 1, false);
-      STL_Object[selectedObjIndex].visible = true;
-      unhideButton[selectedObjIndex].style.display = "none";
-      unhideButton[selectedObjIndex] = undefined;
-    };
-
+    STL_Object[activeIndex].visible = false;
+    unhideButton[activeIndex].style.display = "block";
     toggleMenu("off");
   };
   const onDuplicate = () => {
@@ -486,11 +513,44 @@ const CanvasContainer = ({
     console.log(STL_Object);
     toggleMenu("off");
   };
+  const onFlatDown = () => {
+    console.log("onFlatDown");
+    console.log(STL_Object[activeIndex].quaternion);
+
+    STL_Object[activeIndex].quaternion.setFromUnitVectors(
+      flatDown_Intersect,
+      new THREE.Vector3(0, 0, -1)
+    );
+    rotationControl(
+      activeIndex + 1,
+      STL_Object[activeIndex].rotation.x,
+      STL_Object[activeIndex].rotation.y,
+      STL_Object[activeIndex].rotation.z
+    );
+  };
+  const onExport = () => {
+    SavePopup2.style.left = `${exportPopup.x + 145}px`;
+    SavePopup2.style.top = `${exportPopup.y + 130}px`;
+    SavePopup2.style.display = "block";
+  };
   useEffect(() => {
     LoadButton = document.getElementById("loadButton_wrapper");
     LoadButton.onchange = loadObject;
     RefreshButton = document.getElementById("view_refresh");
     RefreshButton.onclick = refreshCamera;
+    SaveButton = document.getElementById("saveButton");
+    SaveButton.onclick = showSaveButton;
+    SavePopup = document.getElementById("savePopup");
+    SaveFile = document.getElementById("saveFile");
+    SaveFile.onclick = saveObject;
+    exitSaveFile = document.getElementById("exitSave");
+    exitSaveFile.onclick = exitSaveObject;
+
+    SavePopup2 = document.getElementById("savePopup2");
+    SaveFile2 = document.getElementById("saveFile2");
+    SaveFile2.onclick = saveObject2;
+    exitSaveFile2 = document.getElementById("exitSave2");
+    exitSaveFile2.onclick = exitSaveObject2;
 
     Raycaster = new THREE.Raycaster();
     mouse = new THREE.Vector2();
@@ -763,17 +823,25 @@ const CanvasContainer = ({
       outlinePass.selectedObjects = selectedObjects;
     }
   }, [activeObj]);
-
+  useEffect(() => {
+    for (let i = 0; i < objList.length; i++) {
+      if (unhideButton[i] === undefined) {
+        unhideButton[i] = document.getElementById(`unhideButton_${i + 1}`);
+        unhideButton[i].onclick = function () {
+          console.log("selected" + i);
+          changeObjList("isHide", i + 1, false);
+          STL_Object[i].visible = true;
+          unhideButton[i].style.display = "none";
+          unhideButton[i] = undefined;
+        };
+      }
+    }
+  }, [objList]);
   return (
     <div ref={mountRef} className="test">
       <div className="menu">
         <div className="menu-options">
-          <div
-            className="menu-option"
-            onClick={() => {
-              alert("Flat Down");
-            }}
-          >
+          <div className="menu-option" onClick={onFlatDown}>
             Flat Down
           </div>
           <div className="menu-option" onClick={onHide}>
@@ -785,7 +853,16 @@ const CanvasContainer = ({
           <div className="menu-option" onClick={onDelete}>
             Delete
           </div>
+          <div className="menu-option" onClick={onExport}>
+            Export
+          </div>
         </div>
+      </div>
+      <div id="savePopup2">
+        Save Object
+        <input id="accept_file_name2" value="output2"></input>
+        <button id="saveFile2">Save</button>
+        <button id="exitSave2">Cancle</button>
       </div>
     </div>
   );
