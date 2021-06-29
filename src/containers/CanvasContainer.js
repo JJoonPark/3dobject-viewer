@@ -310,8 +310,12 @@ const CanvasContainer = ({
     var targetIntersect = [];
     var existTarget = false;
     for (let i = 0; i < STL_Object.length; i++) {
-      if (STL_Object[i] !== undefined) {
+      if (
+        STL_Object[i] !== undefined &&
+        Raycaster.intersectObject(STL_Object[i], false).length !== 0
+      ) {
         targetIntersect.push(Raycaster.intersectObject(STL_Object[i], false));
+
         flatDown_Intersect = targetIntersect[i][0].face.normal;
       } else targetIntersect.push({ length: 0 });
       if (targetIntersect[i].length > 0) {
